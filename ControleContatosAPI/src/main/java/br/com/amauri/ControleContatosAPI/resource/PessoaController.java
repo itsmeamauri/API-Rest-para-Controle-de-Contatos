@@ -11,25 +11,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.amauri.ControleContatosAPI.DTO.PessoaMalaDireta;
 import br.com.amauri.ControleContatosAPI.Model.Contato;
 import br.com.amauri.ControleContatosAPI.Model.Pessoa;
 
 @RestController
-@RequestMapping(value = "api/pessoa")
+@RequestMapping(value = "api/pessoas")
 public class PessoaController {
-	
+
 	@PostMapping
 	public ResponseEntity<Pessoa> salvarPessoa(@RequestBody Pessoa pessoa) {
 
 		return new ResponseEntity<Pessoa>(pessoa, HttpStatus.CREATED);
-		
+
 	}
-	
-	
-	
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Pessoa> getPessoaByID(@PathVariable long id) {
-		
+
 		Pessoa PessoaCreated = new Pessoa();
 		PessoaCreated.setID(1);
 		PessoaCreated.setNome("meu nome");
@@ -41,22 +40,44 @@ public class PessoaController {
 		return new ResponseEntity<Pessoa>(PessoaCreated, HttpStatus.OK);
 
 	}
-	// TODO: aqui vai a mala direta 
-	
+
+	@GetMapping("/maladireta/{id}")
+	public ResponseEntity<PessoaMalaDireta> getPessoaMalaDiretaByID(@PathVariable long id) {
+
+		Pessoa PessoaCreated = new Pessoa();
+		PessoaCreated.setID(1);
+		PessoaCreated.setNome("fulano");
+		PessoaCreated.setEndereco("Rua A, 1");
+		PessoaCreated.setCEP("11111-00000");
+		PessoaCreated.setCidade("Cidade");
+		PessoaCreated.setUF("UF");
+
+		String malaDireta = String.format("%s – CEP: %s – %s/%s", PessoaCreated.getEndereco(), PessoaCreated.getCEP(),
+				PessoaCreated.getCidade(), PessoaCreated.getUF());
+		
+		
+		PessoaMalaDireta pessoaMalaDireta = new PessoaMalaDireta(PessoaCreated.getID(), PessoaCreated.getNome(),
+				malaDireta);
+		
+		
+		return new ResponseEntity<PessoaMalaDireta>(pessoaMalaDireta, HttpStatus.OK);
+
+	}
+
 	@GetMapping
 	public ResponseEntity<Pessoa> getpessoa() {
 
 		Pessoa PessoaCreated = new Pessoa();
 		PessoaCreated.setID(1);
-		PessoaCreated.setNome("meu nome");
-		PessoaCreated.setEndereco("rua meu endereco");
-		PessoaCreated.setCEP("MEU CEP");
-		PessoaCreated.setCidade("minha cidade");
-		PessoaCreated.setUF("Minha UF");
+		PessoaCreated.setNome("fulano");
+		PessoaCreated.setEndereco("Rua A,1");
+		PessoaCreated.setCEP("11111-00000");
+		PessoaCreated.setCidade("Cidade");
+		PessoaCreated.setUF("UF");
 
 		return new ResponseEntity<Pessoa>(PessoaCreated, HttpStatus.OK);
 	}
-	
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Pessoa> atualizaPessoa(@RequestBody Pessoa pessoa, @PathVariable long id) {
 
@@ -70,9 +91,5 @@ public class PessoaController {
 		return new ResponseEntity<Pessoa>(HttpStatus.OK);
 
 	}
-	
+
 }
-
-
-
-
