@@ -29,4 +29,6 @@ public class Contato {
 		this.contato = contato;
 	}
 
+	
+
 }
