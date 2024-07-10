@@ -19,6 +19,7 @@ import br.com.amauri.ControleContatosAPI.Model.Contato;
 import br.com.amauri.ControleContatosAPI.Model.Pessoa;
 import br.com.amauri.ControleContatosAPI.repository.IContatoRepository;
 import br.com.amauri.ControleContatosAPI.repository.IPessoaRepository;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping(value = "api/pessoas")
@@ -31,7 +32,8 @@ public class PessoaController {
 		this._pessoaRepository = pessoaRepository;
 
 	}
-
+	
+	@Operation(summary = "Grava o registro de Pessoa")
 	@PostMapping
 	public ResponseEntity<Pessoa> salvarPessoa(@RequestBody Pessoa pessoa) {
 
@@ -39,7 +41,8 @@ public class PessoaController {
 		return new ResponseEntity<Pessoa>(pessoaCreated, HttpStatus.CREATED);
 
 	}
-
+	
+	@Operation(summary = "Busca o registro por ID de Pessoa")
 	@GetMapping("/{id}")
 	public ResponseEntity<Pessoa> getPessoaByID(@PathVariable long id) {
 
@@ -50,6 +53,7 @@ public class PessoaController {
 
 	}
 
+	@Operation(summary = "Busca os registros de Pessoa por ID para mala direta")
 	@GetMapping("/maladireta/{id}")
 	public ResponseEntity<PessoaMalaDireta> getPessoaMalaDiretaByID(@PathVariable long id) {
 
@@ -66,7 +70,8 @@ public class PessoaController {
 		return new ResponseEntity<PessoaMalaDireta>(pessoaMalaDireta, HttpStatus.OK);
 
 	}
-
+	
+	@Operation(summary = "Busca todos os registros de Pessoa")
 	@GetMapping
 	public Iterable<Pessoa> getpessoa() {
 
@@ -74,6 +79,7 @@ public class PessoaController {
 
 	}
 
+	@Operation(summary = "Atualiza o registro de Pessoa. Validação por ID")
 	@PutMapping("/{id}")
 	public ResponseEntity<Pessoa> atualizaPessoa(@RequestBody Pessoa pessoa, @PathVariable long id) {
 
@@ -88,6 +94,7 @@ public class PessoaController {
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
+	@Operation(summary = "Exclui o registro de Pessoa por ID ")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Pessoa> excluirPessoa(@PathVariable long id) {
 		Optional<Pessoa> optionalPessoa = _pessoaRepository.findById(id);
