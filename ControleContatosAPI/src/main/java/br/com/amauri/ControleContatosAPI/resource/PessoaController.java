@@ -1,5 +1,7 @@
 package br.com.amauri.ControleContatosAPI.resource;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,13 +43,8 @@ public class PessoaController {
 	@GetMapping("/{id}")
 	public ResponseEntity<Pessoa> getPessoaByID(@PathVariable long id) {
 
-		Pessoa PessoaCreated = new Pessoa();
-		PessoaCreated.setID(1);
-		PessoaCreated.setNome("meu nome");
-		PessoaCreated.setEndereco("rua meu endereco");
-		PessoaCreated.setCEP("MEU CEP");
-		PessoaCreated.setCidade("minha cidade");
-		PessoaCreated.setUF("Minha UF");
+		Optional<Pessoa> objPessoa = _pessoaRepository.findById(id);
+		Pessoa PessoaCreated = objPessoa.get();
 
 		return new ResponseEntity<Pessoa>(PessoaCreated, HttpStatus.OK);
 
@@ -56,13 +53,9 @@ public class PessoaController {
 	@GetMapping("/maladireta/{id}")
 	public ResponseEntity<PessoaMalaDireta> getPessoaMalaDiretaByID(@PathVariable long id) {
 
-		Pessoa PessoaCreated = new Pessoa();
-		PessoaCreated.setID(1);
-		PessoaCreated.setNome("fulano");
-		PessoaCreated.setEndereco("Rua A, 1");
-		PessoaCreated.setCEP("11111-00000");
-		PessoaCreated.setCidade("Cidade");
-		PessoaCreated.setUF("UF");
+		Optional<Pessoa> objPessoa = _pessoaRepository.findById(id);
+
+		Pessoa PessoaCreated = objPessoa.get();
 
 		String malaDireta = String.format("%s – CEP: %s – %s/%s", PessoaCreated.getEndereco(), PessoaCreated.getCEP(),
 				PessoaCreated.getCidade(), PessoaCreated.getUF());
@@ -75,31 +68,38 @@ public class PessoaController {
 	}
 
 	@GetMapping
-	public ResponseEntity<Pessoa> getpessoa() {
+	public Iterable<Pessoa> getpessoa() {
 
-		Pessoa PessoaCreated = new Pessoa();
-		PessoaCreated.setID(1);
-		PessoaCreated.setNome("fulano");
-		PessoaCreated.setEndereco("Rua A,1");
-		PessoaCreated.setCEP("11111-00000");
-		PessoaCreated.setCidade("Cidade");
-		PessoaCreated.setUF("UF");
+		return _pessoaRepository.findAll();
 
-		return new ResponseEntity<Pessoa>(PessoaCreated, HttpStatus.OK);
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Pessoa> atualizaPessoa(@RequestBody Pessoa pessoa, @PathVariable long id) {
 
-		return new ResponseEntity<Pessoa>(pessoa, HttpStatus.OK);
+		if (_pessoaRepository.existsById(id)) {
+			pessoa.setID(id);
+			_pessoaRepository.save(pessoa);
 
+			return new ResponseEntity<Pessoa>(pessoa, HttpStatus.OK);
+
+		}
+
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Pessoa> excluirPessoa(@PathVariable long id) {
+		Optional<Pessoa> optionalPessoa = _pessoaRepository.findById(id);
 
-		return new ResponseEntity<Pessoa>(HttpStatus.OK);
+		if (optionalPessoa.isPresent()) {
+			Pessoa pessoa = optionalPessoa.get();
+			_pessoaRepository.delete(pessoa);
+
+			return new ResponseEntity<Pessoa>(HttpStatus.OK);
+
+		}
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 	}
-
 }
