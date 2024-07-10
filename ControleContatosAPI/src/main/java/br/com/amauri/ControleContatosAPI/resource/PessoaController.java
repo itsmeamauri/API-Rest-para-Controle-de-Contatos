@@ -1,5 +1,6 @@
 package br.com.amauri.ControleContatosAPI.resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,15 +15,26 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.amauri.ControleContatosAPI.DTO.PessoaMalaDireta;
 import br.com.amauri.ControleContatosAPI.Model.Contato;
 import br.com.amauri.ControleContatosAPI.Model.Pessoa;
+import br.com.amauri.ControleContatosAPI.repository.IContatoRepository;
+import br.com.amauri.ControleContatosAPI.repository.IPessoaRepository;
 
 @RestController
 @RequestMapping(value = "api/pessoas")
 public class PessoaController {
 
+	private IPessoaRepository _pessoaRepository;
+
+	@Autowired
+	public PessoaController(IPessoaRepository pessoaRepository) {
+		this._pessoaRepository = pessoaRepository;
+
+	}
+
 	@PostMapping
 	public ResponseEntity<Pessoa> salvarPessoa(@RequestBody Pessoa pessoa) {
 
-		return new ResponseEntity<Pessoa>(pessoa, HttpStatus.CREATED);
+		Pessoa pessoaCreated = _pessoaRepository.save(pessoa);
+		return new ResponseEntity<Pessoa>(pessoaCreated, HttpStatus.CREATED);
 
 	}
 
@@ -54,12 +66,10 @@ public class PessoaController {
 
 		String malaDireta = String.format("%s – CEP: %s – %s/%s", PessoaCreated.getEndereco(), PessoaCreated.getCEP(),
 				PessoaCreated.getCidade(), PessoaCreated.getUF());
-		
-		
+
 		PessoaMalaDireta pessoaMalaDireta = new PessoaMalaDireta(PessoaCreated.getID(), PessoaCreated.getNome(),
 				malaDireta);
-		
-		
+
 		return new ResponseEntity<PessoaMalaDireta>(pessoaMalaDireta, HttpStatus.OK);
 
 	}

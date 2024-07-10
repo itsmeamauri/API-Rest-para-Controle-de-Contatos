@@ -1,5 +1,6 @@
 package br.com.amauri.ControleContatosAPI.resource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,87 +14,96 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import br.com.amauri.ControleContatosAPI.DTO.ContatoDTO;
 import br.com.amauri.ControleContatosAPI.Model.Contato;
+import br.com.amauri.ControleContatosAPI.Model.Pessoa;
+import br.com.amauri.ControleContatosAPI.repository.IContatoRepository;
+import br.com.amauri.ControleContatosAPI.repository.IPessoaRepository;
 
 @RestController
 @RequestMapping(value = "api/contatos")
 public class ContatoController {
 
-	@PostMapping
-	public ResponseEntity<Contato> salvarContato(@RequestBody Contato contato) {
+	private IContatoRepository _contatoRepository;
+	private IPessoaRepository _pessoaRepository;
 
-		return new ResponseEntity<Contato>(contato, HttpStatus.CREATED);
+	@Autowired
+	public ContatoController(IContatoRepository contatoRepository, IPessoaRepository pessoaRepository) {
+		this._contatoRepository = contatoRepository;
+		this._pessoaRepository = pessoaRepository;
+	}
+
+	@PostMapping
+	public ResponseEntity<Contato> salvarContato(@RequestBody ContatoDTO contato) {
+		long pessoaId = contato.pessoaId();
+
+		Optional<Pessoa> objPessoa = _pessoaRepository.findById(pessoaId);
+
+		Contato objContato = new Contato();
+		objContato.setTipo(contato.tipo());
+		objContato.setContato(contato.contato());
+		objContato.setPessoa(objPessoa.get());
+
+		_contatoRepository.save(objContato);
+
+		return new ResponseEntity<Contato>(HttpStatus.CREATED);
 	}
 
 	@GetMapping
 	public Iterable<Contato> getListaContatos() {
-
-		List<Contato> ListaContatos = new ArrayList<>();
-
-		Contato ContatoCreated = new Contato();
-		ContatoCreated.setID(1);
-		ContatoCreated.setTipo(0);
-		ContatoCreated.setContato("eu sou sum contato");
-
-		ListaContatos.add(ContatoCreated);
-
-		Contato ContatoCreated2 = new Contato();
-		ContatoCreated2.setID(0);
-		ContatoCreated2.setTipo(1);
-		ContatoCreated2.setContato("eu sou sum contato 2");
-
-		ListaContatos.add(ContatoCreated2);
-
-		return ListaContatos;
+		return _contatoRepository.findAll();
 
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Contato> getContatoByID(@PathVariable long id) {
+	public ResponseEntity<ContatoDTO> getContatoByID(@PathVariable long id) {
 
-		Contato ContatoCreated = new Contato();
-		ContatoCreated.setID(1);
-		ContatoCreated.setTipo(0);
-		ContatoCreated.setContato("eu sou sum contato");
+		Optional<Contato> objContato = _contatoRepository.findById(id);
 
-		return new ResponseEntity<Contato>(ContatoCreated, HttpStatus.OK);
+		ContatoDTO objDTO = new ContatoDTO(objContato.get().getID(), objContato.get().getTipo(),
+				objContato.get().getContato(), objContato.get().getPessoa().getID());
+
+		return new ResponseEntity<ContatoDTO>(objDTO, HttpStatus.OK);
 
 	}
 
 	@GetMapping("/pessoa/{idPessoa}")
 	public Iterable<Contato> getContatosPessoaByID(@PathVariable long idPessoa) {
 
-		List<Contato> ListaContatos = new ArrayList<>();
+		Optional<Pessoa> objPessoa = _pessoaRepository.findById(idPessoa);
 
-		Contato ContatoCreated = new Contato();
-		ContatoCreated.setID(1);
-		ContatoCreated.setTipo(0);
-		ContatoCreated.setContato("eu sou sum contato");
-
-		ListaContatos.add(ContatoCreated);
-
-		Contato ContatoCreated2 = new Contato();
-		ContatoCreated2.setID(0);
-		ContatoCreated2.setTipo(1);
-		ContatoCreated2.setContato("eu sou sum contato 2");
-
-		ListaContatos.add(ContatoCreated2);
-
-		return ListaContatos;
+		return objPessoa.get().getContatos();
 
 	}
 
 	@PutMapping("/{id}")
 	public ResponseEntity<Contato> atualizaContato(@RequestBody Contato contato, @PathVariable long id) {
 
-		return new ResponseEntity<Contato>(contato, HttpStatus.OK);
+		if (_contatoRepository.existsById(id)) {
+			contato.setID(id);
+			_contatoRepository.save(contato);
+
+			return new ResponseEntity<Contato>(contato, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 	}
 
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Contato> excluirContato(@PathVariable long id) {
+		Optional<Contato> optionalContato = _contatoRepository.findById(id);
 
-		return new ResponseEntity<Contato>(HttpStatus.OK);
+		if (optionalContato.isPresent()) {
+			Contato contato = optionalContato.get();
+			_contatoRepository.delete(contato);
+
+			return new ResponseEntity<Contato>(contato, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 	}
 }
