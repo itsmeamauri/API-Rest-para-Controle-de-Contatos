@@ -28,7 +28,7 @@ public class OpenApiConfig {
                 .description("Este app faz o controle de cadastro de pessoas bem como o cadastro e controle "
                     + "de seus respectivos contatos.")
                 .contact(new Contact()
-                    .name("amauri")
+                    .name("Amauri")
                     .email("amaurijuniorcomercial@gmail.com")
                     .url("http://localhost:8080")
                 )
